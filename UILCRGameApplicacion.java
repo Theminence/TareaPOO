@@ -1,48 +1,56 @@
+import java.util.Scanner;
+
 
 /**
- * Presenta interfaz de usuario en consola para el 
- * juego Left-Center-Right.
- *
- * @author (Cecilia Curlango Rosas)
- * @version 1.0 (agosto 2025)
- */
+* Presenta interfaz de usuario en consola para el
+* juego Left-Center-Right.
+*
+* @author (Cecilia Curlango Rosas)
+* @version 1.0 (agosto 2025)
+*/
 public class UILCRGameApplicacion
 {
-    private LCRGame juego;
+   private LCRGame juego;
+   private Scanner scanner;
 
-    public UILCRGameApplicacion() {
-        juego = new LCRGame();
+
+   public UILCRGameApplicacion() {
+       juego = new LCRGame();
+       scanner = new Scanner(System.in);
+   }
+
+
+   /**
+    * Juega el juego LEFT-CENTER-RIGHT
+    */
+   public void jugar()
+    {
+       System.out.println("¡Bienvenido al juego Left-Center-Right!");
+       System.out.print("¿Cuántos jugadores van a jugar? (mínimo 3): ");
+      
+       int cantidadJugadores = scanner.nextInt();
+      
+       // Validar que haya al menos 3 jugadores
+       while (cantidadJugadores < 3) {
+           System.out.print("El juego requiere al menos 3 jugadores. Ingrese nuevamente: ");
+           cantidadJugadores = scanner.nextInt();
+       }
+      
+       // Consumir el salto de línea que queda después de nextInt()
+       scanner.nextLine();
+      
+       juego.crearJugadores(cantidadJugadores);
+      
+       // Solicitar nombres de los jugadores
+       System.out.println("\nAhora ingresa los nombres de los jugadores:");
+       for (int i = 0; i < cantidadJugadores; i++) {
+           System.out.print("Nombre del jugador " + (i + 1) + ": ");
+           String nombre = scanner.nextLine();
+           juego.getJugadores().get(i).setNombre(nombre);
+       }
+      
+       System.out.println("\n¡Jugadores registrados!");
+       for (int i = 0; i < juego.getJugadores().size(); i++) {
+           System.out.println("- " + juego.getJugadores().get(i).getNombre());
+       }
     }
-
-    /**
-     * Juega el juego LEFT-CENTER-RIGHT
-     */
-    public void jugar() {
-        juego.crearJugadores();
-        juego.encontrarPrimerJugador();
-
-        do {
-            juego.lanzarDados();
-            juego.procesarResultados();
-            mostrarJugada();
-            juego.cambiarTurno();
-            juego.establecerJugadores();
-        }while(!juego.esFinDeJuego());
-
-        // mostrar ganador
-        System.out.println("Ganador " + juego.getGanador().getNombre());
-    }
-
-    /**
-     * Muestra los dados, fichas de los jugadores y del centro.
-     */
-    private void mostrarJugada() {
-        System.out.print("Dados " + juego.getDado1().getValor() + " ");
-        System.out.print(juego.getDado2().getValor() + " ");
-        System.out.println(juego.getDado3().getValor());
-        System.out.println("Primer jugador tiene " + juego.getJugador1().getFichas());
-        System.out.println("Segundo jugador tiene " + juego.getJugador2().getFichas());
-        System.out.println("Tercer jugador tiene " + juego.getJugador3().getFichas());
-        System.out.println("Centro " + juego.getCentro().getFichas());
-    }
-}
