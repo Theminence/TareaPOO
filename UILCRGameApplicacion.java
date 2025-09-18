@@ -53,4 +53,96 @@ public class UILCRGameApplicacion
        for (int i = 0; i < juego.getJugadores().size(); i++) {
            System.out.println("- " + juego.getJugadores().get(i).getNombre());
        }
-    }
+      
+       int primerJugador = juego.encontrarPrimerJugador();
+       System.out.println("El jugador " + primerJugador + " comenzará el juego.");
+      
+       System.out.print("\nPresiona Enter para comenzar el juego...");
+       scanner.nextLine();
+
+
+       do {
+           // Mostrar quién es el jugador actual
+           System.out.println("\n--- Turno de " + juego.getJugadores().get(juego.getTurno() - 1).getNombre() + " ---");
+          
+           boolean puedeLanzar = juego.lanzarDados();
+          
+           if (puedeLanzar) {
+               juego.procesarResultados();
+               mostrarJugada();
+           } else {
+               // El jugador no tiene fichas, pasa turno
+               System.out.println(juego.getJugadores().get(juego.getTurno() - 1).getNombre() +
+                                " no tiene fichas, pasa turno.");
+           }
+          
+           // Pausa para continuar al siguiente turno
+           if (!juego.esFinDeJuego()) {
+               System.out.print("\nPresiona Enter para continuar al siguiente turno...");
+               scanner.nextLine();
+           }
+          
+           juego.cambiarTurno();
+           juego.establecerJugadores();
+       }while(!juego.esFinDeJuego());
+
+
+       // mostrar ganador
+       System.out.println("¡Felicidades! El ganador es: " + juego.getGanador().getNombre());
+   }
+
+
+   /**
+    * Muestra los dados, fichas de los jugadores y del centro.
+    */
+   private void mostrarJugada() {
+       // Mostrar solo los dados que se lanzaron
+       System.out.print("Dados lanzados: ");
+       int dadosLanzados = juego.getDadosLanzados();
+      
+       switch (dadosLanzados) {
+           case 1:
+               System.out.println(juego.getDado1().getValor());
+               break;
+           case 2:
+               System.out.print(juego.getDado1().getValor() + " ");
+               System.out.println(juego.getDado2().getValor());
+               break;
+           case 3:
+               System.out.print(juego.getDado1().getValor() + " ");
+               System.out.print(juego.getDado2().getValor() + " ");
+               System.out.println(juego.getDado3().getValor());
+               break;
+           default:
+               System.out.println("Ninguno (no tiene fichas)");
+               break;
+       }
+      
+       // Mostrar fichas de todos los jugadores dinámicamente
+       System.out.println("Estado actual de fichas:");
+       for (int i = 0; i < juego.getJugadores().size(); i++) {
+           Jugador jugador = juego.getJugadores().get(i);
+           String indicador;
+           if (i == juego.getTurno() - 1) {
+               indicador = " ← JUGANDO";
+           } else {
+               indicador = "";
+           }
+           System.out.println("  " + jugador.getNombre() + ": " + jugador.getFichas() + " fichas" + indicador);
+       }
+      
+       System.out.println("  Centro: " + juego.getCentro().getFichas() + " fichas");
+   }
+  
+   /**
+    * Método principal para ejecutar el juego.
+    */
+   public static void main(String[] args) {
+       UILCRGameApplicacion ui = new UILCRGameApplicacion();
+       ui.jugar();
+   }
+}
+
+
+
+
