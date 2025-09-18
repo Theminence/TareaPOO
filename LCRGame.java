@@ -1,4 +1,6 @@
 
+import java.util.ArrayList;
+
 /**
  * Juego Left-Center-Write.
  *
@@ -10,10 +12,11 @@
 public class LCRGame
 {
     private DadoLCR dado1, dado2, dado3;
-    private Jugador jugador1, jugador2, jugador3;
+    private ArrayList<Jugador> jugadores;
     private Jugador jugadorActual, jugadorIzquierda, jugadorDerecha;
     private Jugador jugadorGanador;
     private int turno;
+    private int dadosLanzados; // Cantidad de dados lanzados en el turno actual
     private Centro centro;
 
     /**
@@ -25,37 +28,29 @@ public class LCRGame
         dado2 = new DadoLCR();
         dado3 = new DadoLCR();
         centro = new Centro();
-
-        jugador1 = new Jugador();
-        jugador2 = new Jugador();
-        jugador3 = new Jugador();
+        jugadores = new ArrayList<Jugador>();
     }
 
     /**
-     * Determina si dos de los 3 jugadores se
+     * Determina si todos los jugadores excepto uno se
      * quedaron sin fichas. En ese caso, hay 
-     * ganador. El jugador ganador se asgina.
+     * ganador. El jugador ganador se asigna.
      * @return true si sólo queda un jugador con fichas.
      */
     public boolean esFinDeJuego() {
         int jugadoresEnCero = 0;
         boolean seTermino = false;
-        if (jugador1.getFichas()==0) {
-            jugadoresEnCero++;
-        } else{
-            jugadorGanador = jugador1;
+        
+        for (int i = 0; i < jugadores.size(); i++) {
+            Jugador jugador = jugadores.get(i);
+            if (jugador.getFichas() == 0) {
+                jugadoresEnCero++;
+            } else {
+                jugadorGanador = jugador;
+            }
         }
-        if (jugador2.getFichas()==0) {
-            jugadoresEnCero++;
-        } else {
-            jugadorGanador = jugador2;
-        }
-        if (jugador3.getFichas()==0) {
-            jugadoresEnCero++;
-        } else {
-            jugadorGanador = jugador3;
-        }
-        if (jugadoresEnCero==2) {
+        
+        if (jugadoresEnCero == jugadores.size() - 1) {
             seTermino = true;
         }
         return seTermino;
@@ -130,7 +125,7 @@ public class LCRGame
      */
     public void cambiarTurno() {
         turno++;
-        if (turno==4) {
+        if (turno > jugadores.size()) {
             turno = 1;
         }
     }
@@ -141,202 +136,18 @@ public class LCRGame
      * al de la derecha.
      */
     public void establecerJugadores() {
-        switch (turno) {
-            case 1:
-                jugadorActual = jugador1;
-                jugadorIzquierda = jugador3;
-                jugadorDerecha = jugador2;
-                break;
-            case 2:
-                jugadorActual = jugador2;
-                jugadorIzquierda = jugador1;
-                jugadorDerecha = jugador3;
-                break;
-            case 3:
-                jugadorActual = jugador3;
-                jugadorIzquierda = jugador2;
-                jugadorDerecha = jugador1;
-                break;
+        if (jugadores.size() >= 3) {
+            jugadorActual = jugadores.get(turno - 1);
+            
+            // Jugador de la izquierda (anterior en el círculo)
+            int indiceIzquierda = (turno - 2 + jugadores.size()) % jugadores.size();
+            jugadorIzquierda = jugadores.get(indiceIzquierda);
+            
+            // Jugador de la derecha (siguiente en el círculo)
+            int indiceDerecha = turno % jugadores.size();
+            jugadorDerecha = jugadores.get(indiceDerecha);
         }
     }
 
-    /**
-     * Lanza los dados del juego. La cantidad
-     * de dados que se lanza depende de la cantidad
-     * de fichas que tiene el jugador actual.
-     */
-    public void lanzarDados() {
-        int fichas = jugadorActual.getFichas();
-        switch (fichas) {
-            case 0: 
-                break;
-            case 1:
-                lanzar1Dado();
-                break;
-            case 2:
-                lanzar2Dados();
-                break;
-            default:
-                lanzar3Dados();
-        }
-    }
-
-    /**
-     * Método de prueba que simula un juego.
-     * 
-     */
-    private String jugar() {
-        crearJugadores();
-        Jugador inicial = null;
-        switch (encontrarPrimerJugador()) {
-            case 1:
-                inicial = jugador1;
-                break;
-            case 2:
-                inicial = jugador2;
-                break;
-            case 3:
-                inicial = jugador3;
-                break;
-        }
-        return inicial.getNombre();
-
-    }
-
-    /**
-     * Simula la creación de los jugadores. 
-     * Le asigna un nombre predeterminado a cada uno.
-     */
-    public void crearJugadores() {
-        jugador1.setNombre("uno");
-        jugador2.setNombre("dos");
-        jugador3.setNombre("tres");
-    }
-
-    /**
-     * Determina por suerte cuál de los tres
-     * jugadores iniciará el juego. Lanza los
-     * tres dados para cada jugador y el que
-     * tenga la mayor cantidad de puntos es el 
-     * que empieza el juego.
-     * @return el número del jugador que iniciará (1-3).
-     */
-    public int encontrarPrimerJugador() {
-        // turno del primer jugador
-        int primerJugador = 1;
-        jugadorActual = jugador1;
-        lanzar3Dados();
-        int cuantosPuntosHay = contarPuntos();
-
-        // turno del segundo jugador
-        lanzar3Dados();
-        if (cuantosPuntosHay < contarPuntos()) {
-            primerJugador = 2;
-            jugadorActual = jugador2;
-            cuantosPuntosHay = contarPuntos();
-        }
-
-        // turno del tercer jugador
-        lanzar3Dados();
-        if (cuantosPuntosHay < contarPuntos()) {
-            primerJugador = 3;
-            jugadorActual = jugador3;
-            cuantosPuntosHay = contarPuntos();
-        }
-        turno = primerJugador;
-        establecerJugadores();
-        return primerJugador;
-    }
-
-    /**
-     * Cuenta cuantos dados caen en punto.
-     * @return cantidad de dados que tienen un punto.
-     */
-    private int contarPuntos() {
-        int contador = 0;
-        if (dado1.getValor() == '*') {
-            contador++;
-        }
-        if (dado2.getValor() == '*') {
-            contador++;
-        }
-        if (dado3.getValor() == '*') {
-            contador++;
-        }
-        return contador;
-    }
-
-    /**
-     * Lanza los 1 dado.
-     */
-    private void lanzar1Dado() {
-        dado1.lanzar();
-    }
-
-    /**
-     * Lanza los 2 dados.
-     */
-    private void lanzar2Dados() {
-        dado1.lanzar();
-        dado2.lanzar();
-    }
-
-    /**
-     * Lanza los 3 dados.
-     */
-    private void lanzar3Dados() {
-        dado1.lanzar();
-        dado2.lanzar();
-        dado3.lanzar();
-    }
-    /**
-     * Regresa al primer jugador.
-     * @return primer jugador
-     */
-    public Jugador getJugador1() {
-        return jugador1;
-    }
-    /**
-     * Regresa al segundo jugador.
-     * @return segundo jugador
-     */
-    public Jugador getJugador2() {
-        return jugador2;
-    }
-    /**
-     * Regresa al tercer jugador.
-     * @return tercer jugador
-     */
-    public Jugador getJugador3() {
-        return jugador3;
-    }
-    /**
-     * Regresa el primer dado.
-     * @return primer dado del juego
-     */
-    public DadoLCR getDado1() {
-        return dado1;
-    }
-    /**
-     * Regresa el segundo dado.
-     * @return segundo dado del juego
-     */
-    public DadoLCR getDado2() {
-        return dado2;
-    }
-    /**
-     * Regresa el tercer dado.
-     * @return tercer dado del juego
-     */
-    public DadoLCR getDado3() {
-        return dado3;
-    }
-    /**
-     * Regresa el centro del juego.
-     * @return centro del juego
-     */
-    public Centro getCentro() {
-        return centro;
-    }
     
 }

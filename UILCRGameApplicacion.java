@@ -46,4 +46,3 @@ public class UILCRGameApplicacion
         System.out.println("Centro " + juego.getCentro().getFichas());
     }
 }
-
